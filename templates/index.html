@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>ETF-Popularity Scraper</title>
+  </head>
+  <body>
+    <h1>Run Popularity ETF Algorithm</h1>
+    <form method="post">
+      <input
+        type="text"
+        name="user_input"
+        placeholder="Enter your query…"
+        required
+        style="width:300px"
+      />
+      <button type="submit">Go</button>
+    </form>
+
+    {% with msgs = get_flashed_messages() %}
+      {% if msgs %}
+        <ul style="color:red">
+          {% for m in msgs %}<li>{{ m }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </body>
+</html>
