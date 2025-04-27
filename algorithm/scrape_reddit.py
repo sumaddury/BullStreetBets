@@ -1,53 +1,68 @@
 import os
-import math
 import time
 import random
+import math
 import datetime
 import requests
 import pandas as pd
 
-SAMPLE_PER_MONTH = 1000
-HITS_PER_PAGE = 1000
+# Configuration
+SAMPLE_PER_WEEK = 1000   # samples per week
+WEEKS_PER_MONTH = 4      # number of segments per month
+HITS_PER_PAGE = 1000     # Algolia's max hits per page
 OUTPUT_CSV = os.path.join("tmp", "hn_raw_posts.csv")
-
 API_URL = "https://hn.algolia.com/api/v1/search_by_date"
 
 
-def fetch_hn_month(year: int, month: int, sample_size: int):
-    start = int(datetime.datetime(year, month, 1).timestamp())
-    end = int(datetime.datetime(year + (month==12), ((month % 12) + 1), 1).timestamp())
+def fetch_hn_month(year: int, month: int):
+    """
+    Fetch up to SAMPLE_PER_WEEK hits for each of WEEKS_PER_MONTH segments in the given month.
+    """
+    # compute month boundaries
+    start_dt = datetime.datetime(year, month, 1)
+    if month == 12:
+        next_month_dt = datetime.datetime(year + 1, 1, 1)
+    else:
+        next_month_dt = datetime.datetime(year, month + 1, 1)
 
-    pages_needed = math.ceil(sample_size / HITS_PER_PAGE)
+    total_days = (next_month_dt - start_dt).days
+    segment_days = math.ceil(total_days / WEEKS_PER_MONTH)
     all_hits = []
 
-    for page in range(pages_needed):
+    for i in range(WEEKS_PER_MONTH):
+        seg_start = start_dt + datetime.timedelta(days=i * segment_days)
+        seg_end = seg_start + datetime.timedelta(days=segment_days)
+        if seg_end > next_month_dt:
+            seg_end = next_month_dt
+
+        start_ts = int(seg_start.timestamp())
+        end_ts = int(seg_end.timestamp())
+
+        # Fetch one page of up to HITS_PER_PAGE (acts as SAMPLE_PER_WEEK)
         params = {
             "tags": "(story,comment)",
             "hitsPerPage": HITS_PER_PAGE,
-            "page": page,
-            "numericFilters": f"created_at_i>={start},created_at_i<{end}"
+            "page": 0,
+            "numericFilters": f"created_at_i>={start_ts},created_at_i<{end_ts}"
         }
         resp = requests.get(API_URL, params=params)
         resp.raise_for_status()
-        data = resp.json()
-        hits = data.get("hits", [])
-        if not hits:
-            break
+        hits = resp.json().get("hits", [])
+
+        # random sample down to SAMPLE_PER_WEEK
+        if len(hits) > SAMPLE_PER_WEEK:
+            hits = random.sample(hits, SAMPLE_PER_WEEK)
+
         all_hits.extend(hits)
         time.sleep(0.5)
 
     if not all_hits:
         return pd.DataFrame()
 
-    sampled = random.sample(all_hits, min(sample_size, len(all_hits)))
-    return build_dataframe(sampled, year, month)
-
+    return build_dataframe(all_hits, year, month)
 
 
 def build_dataframe(hits, year, month):
-    """
-    Build a pandas DataFrame with desired fields, extracting type and body.
-    """
     rows = []
     for hit in hits:
         tags = hit.get("_tags", [])
@@ -78,13 +93,14 @@ def build_dataframe(hits, year, month):
 def main():
     today = datetime.date.today()
     dfs = []
+
     for i in range(24):
         year_offset, m_idx = divmod(today.month - 1 - i, 12)
         y = today.year + year_offset
         m = m_idx + 1
         print(f"→ Fetching {y}-{m:02d}…")
         try:
-            df = fetch_hn_month(y, m, SAMPLE_PER_MONTH)
+            df = fetch_hn_month(y, m)
             print(f"   collected {len(df)} rows")
             dfs.append(df)
         except Exception as e:
