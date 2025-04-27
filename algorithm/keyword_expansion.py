@@ -1,6 +1,3 @@
-
-# algorithm/keyword_expansion.py
-
 import os
 from typing import List
 import wikipedia
@@ -8,17 +5,12 @@ from nltk import word_tokenize, pos_tag, RegexpParser
 from nltk.corpus import wordnet
 from sentence_transformers import SentenceTransformer, util
 
-# Ensure NLTK data installed:
-# python -c "import nltk; nltk.download('wordnet omw-1.4 punkt averaged_perceptron_tagger')"
 
-# Embedding model for semantic ranking
 enb_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# NLP chunker (noun phrases)
 grammar = r"NP: {<JJ>*<NN.*>+}"
 chunker = RegexpParser(grammar)
 
-# --- Wikipedia link‑based expansion ---
 def get_wikipedia_candidates(
     input_phrases: List[str],
     max_pages: int = 3,
@@ -41,12 +33,9 @@ def get_wikipedia_candidates(
                 page = wikipedia.page(title, auto_suggest=False)
             except Exception:
                 continue
-            # include page title
             candidates.add(page.title)
-            # include internal links
             for link in page.links[:max_links_per_page]:
                 candidates.add(link)
-            # include categories (strip 'Category:' prefix)
             for cat in page.categories:
                 if cat.startswith('Category:'):
                     candidates.add(cat.replace('Category:', ''))
@@ -54,7 +43,6 @@ def get_wikipedia_candidates(
                     candidates.add(cat)
     return list(candidates)
 
-# --- WordNet expansions (synonyms, hypernyms, hyponyms) ---
 def get_wordnet_candidates(input_phrases: List[str]) -> List[str]:
     candidates = set()
     for phrase in input_phrases:
@@ -67,7 +55,6 @@ def get_wordnet_candidates(input_phrases: List[str]) -> List[str]:
                     candidates.add(lemma.name().replace('_', ' '))
     return list(candidates)
 
-# --- Main expansion function without LLM ---
 def expand_to_keywords(
     input_phrases: List[str],
     num_keywords: int = 50
@@ -77,14 +64,12 @@ def expand_to_keywords(
     2) Rank by mean embedding similarity to input phrases.
     3) Return top `num_keywords`.
     """
-    # 1) Seed pool
     wiki_cands = get_wikipedia_candidates(input_phrases)
     wn_cands = get_wordnet_candidates(input_phrases)
     seed = list({*wiki_cands, *wn_cands})
     if not seed:
         seed = input_phrases[:]
 
-    # 2) Embed and rank
     phrase_embeds = enb_model.encode(input_phrases, convert_to_tensor=True)
     seed_embeds = enb_model.encode(seed, convert_to_tensor=True)
     query_vec = phrase_embeds.mean(dim=0, keepdim=True)
@@ -93,7 +78,6 @@ def expand_to_keywords(
     keywords = [seed[i] for i in top_idxs]
     return keywords
 
-# --- Save to file ---
 def save_keywords(
     keywords: List[str],
     filepath: str = "tmp/keywords.txt"

@@ -35,14 +35,13 @@ def run_inference(user_input: str) -> str:
     phrases = [p.strip() for p in user_input.split(",")]
     keywords = expand_to_keywords(phrases, num_keywords=100)
     save_keywords(keywords, filepath="tmp/keywords.txt")
-    
+
     log("→ Scraping Reddit")
-    time.sleep(1)  # simulate work
+    time.sleep(1)
 
     log("→ Compiling data")
     time.sleep(1)
 
-    # create timestamped result folder
     ts = datetime.now().strftime("%Y%m%d%H%M%S")
     result_dir = os.path.join("static", "results", ts)
     os.makedirs(result_dir, exist_ok=True)
