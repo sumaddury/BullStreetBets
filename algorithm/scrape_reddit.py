@@ -6,10 +6,9 @@ import datetime
 import requests
 import pandas as pd
 
-# Configuration
-SAMPLE_PER_WEEK = 1000   # samples per week
-WEEKS_PER_MONTH = 4      # number of segments per month
-HITS_PER_PAGE = 1000     # Algolia's max hits per page
+SAMPLE_PER_WEEK = 1000
+WEEKS_PER_MONTH = 4
+HITS_PER_PAGE = 1000
 OUTPUT_CSV = os.path.join("tmp", "hn_raw_posts.csv")
 API_URL = "https://hn.algolia.com/api/v1/search_by_date"
 
@@ -18,7 +17,6 @@ def fetch_hn_month(year: int, month: int):
     """
     Fetch up to SAMPLE_PER_WEEK hits for each of WEEKS_PER_MONTH segments in the given month.
     """
-    # compute month boundaries
     start_dt = datetime.datetime(year, month, 1)
     if month == 12:
         next_month_dt = datetime.datetime(year + 1, 1, 1)
@@ -38,7 +36,6 @@ def fetch_hn_month(year: int, month: int):
         start_ts = int(seg_start.timestamp())
         end_ts = int(seg_end.timestamp())
 
-        # Fetch one page of up to HITS_PER_PAGE (acts as SAMPLE_PER_WEEK)
         params = {
             "tags": "(story,comment)",
             "hitsPerPage": HITS_PER_PAGE,
@@ -49,7 +46,6 @@ def fetch_hn_month(year: int, month: int):
         resp.raise_for_status()
         hits = resp.json().get("hits", [])
 
-        # random sample down to SAMPLE_PER_WEEK
         if len(hits) > SAMPLE_PER_WEEK:
             hits = random.sample(hits, SAMPLE_PER_WEEK)
 
