@@ -20,12 +20,12 @@ DATA_CSV = 'tmp/hn_raw_posts.csv'
 # Path to the keywords file
 KEYWORDS_FILE = 'tmp/keywords.txt'
 # Minimum total keyword occurrences per post (threshold for counting)
-THRESHOLD = 1
+THRESHOLD = 2
 # Weight for story-type posts (>= THRESHOLD occurrences)
 STORY_WEIGHT = 1.0
 # Weight for comment-type posts (>= THRESHOLD occurrences)
 # Based on relative significance, choose a value in (0,1)
-COMMENT_WEIGHT = 0.25
+COMMENT_WEIGHT = 0.4
 # Path to the output CSV for monthly weighted counts
 OUTPUT_CSV = 'tmp/traffic_counts_weighted.csv'
 
