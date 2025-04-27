@@ -1,5 +1,5 @@
 static/
 __pycache__/
 tmp/
-/.venv
+.venv/
 .DS_Store
