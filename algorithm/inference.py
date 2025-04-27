@@ -1,10 +1,30 @@
 import os
 import sys
 import time
+import re
 from datetime import datetime
+from algorithm.keyword_expansion import expand_to_keywords, save_keywords
+
 
 def validate_input(user_input: str) -> bool:
-    return bool(user_input and user_input.strip())
+    _PHRASE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9' \-]*[A-Za-z0-9]$")
+    if not isinstance(user_input, str):
+        return False
+    s = user_input.strip()
+    if not s:
+        return False
+
+    if s[0] == ',' or s[-1] == ',':
+        return False
+
+    parts = s.split(',')
+    for part in parts:
+        p = part.strip()
+        if not p:
+            return False
+        if not _PHRASE_RE.match(p):
+            return False
+    return True
 
 def run_inference(user_input: str) -> str:
     def log(msg: str):
@@ -12,6 +32,10 @@ def run_inference(user_input: str) -> str:
         sys.stdout.flush()
 
     log("Starting inference…")
+    phrases = [p.strip() for p in user_input.split(",")]
+    keywords = expand_to_keywords(phrases, num_keywords=100)
+    save_keywords(keywords, filepath="tmp/keywords.txt")
+    
     log("→ Scraping Reddit")
     time.sleep(1)  # simulate work
 

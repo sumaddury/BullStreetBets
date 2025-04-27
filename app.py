@@ -10,7 +10,10 @@ def index():
     if request.method == "POST":
         text = request.form.get("user_input", "")
         if not validate_input(text):
-            flash("❌ Invalid input. Try again.")
+            flash("❌ Usage: Must be a non-empty string. Cannot start or end with a comma. \\" \
+            "Phrases are separated by single commas (no “,,”). \\" \
+            "After splitting on commas, each phrase (trimmed) must be non-empty. \\" \
+            "Each phrase may only contain letters, digits, spaces, apostrophes ('), and hyphens (-). \\")
             return redirect(url_for("index"))
 
         try:
