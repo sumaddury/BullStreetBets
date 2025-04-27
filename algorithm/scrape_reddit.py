@@ -106,9 +106,9 @@ def main():
         result = pd.concat(dfs, ignore_index=True)
         os.makedirs(os.path.dirname(OUTPUT_CSV), exist_ok=True)
         result.to_csv(OUTPUT_CSV, index=False)
-        print(f"✅ Saved raw HN posts to {OUTPUT_CSV}")
+        print(f"Saved raw HN posts to {OUTPUT_CSV}")
     else:
-        print("❌ No data fetched; check your network or API limits.")
+        print("No data fetched; check your network or API limits.")
 
 
 if __name__ == "__main__":

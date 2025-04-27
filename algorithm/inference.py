@@ -34,7 +34,7 @@ def run_inference(user_input: str) -> str:
         print(f"[inference] {msg}")
         sys.stdout.flush()
 
-    log("Starting inference...")
+    log("Building Keywords...")
     phrases = [p.strip() for p in user_input.split(",")]
     keywords = expand_to_keywords(phrases, num_keywords=100)
     save_keywords(keywords, filepath="tmp/keywords.txt")
@@ -47,6 +47,10 @@ def run_inference(user_input: str) -> str:
 
     log("Analyze Time Series...")
     os.system("python3 algorithm/spike_detector.py")
+
+    log("Pulling ETFs...")
+    os.system("python3 algorithm/scrape_etfs.py")
+    os.system("python3 algorithm/etf_selector.py")
 
     ts = datetime.now().strftime("%Y%m%d%H%M%S")
     result_dir = os.path.join("static", "results", ts)
@@ -62,9 +66,9 @@ def run_inference(user_input: str) -> str:
     md_lines = [f"# Traffic Spike Analysis for “{user_input}”", ""]
     md_lines.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     md_lines.append("")
-    md_lines.append("| Parameter | Value |")
-    md_lines.append("|---|---|")
-    for key in ['year','month','latest_rate','beta','mean','stdev','variance','median','min','max','threshold','recommendation']:
+    md_lines.append("| Parameter        | Value      |")
+    md_lines.append("|:-----------------|-----------:|")
+    for key in ['year','month','latest_rate','beta','mean','stdev','variance','median','min','max','threshold','recommendation', 'relevant_etfs']:
         md_lines.append(f"| {key} | {report.get(key)} |")
     md_lines.append("")
     md_lines.append("## Spike Plot")

@@ -52,7 +52,7 @@ def detect_spike(rates, beta):
 
 
 def plot_timeseries(dates, rates, stats, threshold):
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(6, 3), dpi=100)
     plt.plot(dates, rates, marker='o', label='avg_per_day')
     plt.axhline(stats['mean'], linestyle='--', label='baseline mean')
     plt.axhline(threshold, linestyle='-.', label=f'mean + {BETA}*std')
@@ -61,7 +61,7 @@ def plot_timeseries(dates, rates, stats, threshold):
     plt.ylabel('Avg Weighted Traffic per Day')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(PLOT_PATH)
+    plt.savefig(PLOT_PATH, dpi=100, bbox_inches='tight')
     plt.close()
 
 
