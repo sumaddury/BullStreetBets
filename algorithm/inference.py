@@ -3,6 +3,7 @@ import sys
 import time
 import re
 import json
+import shutil
 from datetime import datetime
 from algorithm.keyword_expansion import expand_to_keywords, save_keywords
 
@@ -58,7 +59,7 @@ def run_inference(user_input: str) -> str:
 
     src_json = os.path.join("tmp", "spike_report.json")
     dst_json = os.path.join(result_dir, "spike_report.json")
-    os.replace(src_json, dst_json)
+    shutil.move(src_json, dst_json)
 
     with open(dst_json, 'r', encoding='utf-8') as f:
         report = json.load(f)
