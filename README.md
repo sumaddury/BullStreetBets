@@ -9,8 +9,13 @@
 6. Renders a live-streamed log and a Markdown report with statistics and plots
 
 ---
+**To pull: Clone**
+```bash
+git clone https://github.com/sumaddury/BullStreetBets.git
+cd BullStreetBets
+```
 **To run: Use Docker**
-1. Build and run container
+2. Build and run container
 ```bash
 docker build -t bullstreetbets .
 docker run -d \
@@ -23,9 +28,9 @@ docker run -d \
   --name bullstreetbets \
   bullstreetbets
 ```
-2. View logs
+3. View logs
 ```bash
 docker logs -f bullstreetbets
 ```
-3. Navigate to http://localhost:3000/
+4. Navigate to http://localhost:3000/
 ---
